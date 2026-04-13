@@ -1,0 +1,47 @@
+// ============================================================
+// 📁 shared/guards/auth.guard.ts — Route Guard
+// ============================================================
+// INTERVIEW TIP: "Route guards in Angular control navigation.
+// canActivate returns true/false — if false, the navigation is
+// cancelled. Modern Angular uses functional guards (functions)
+// instead of class-based guards (deprecated pattern)."
+//
+// FLOW:
+// User clicks link → Router checks guard → guard returns true/false
+//   → true: navigate to page
+//   → false: redirect to /login
+// ============================================================
+
+import { inject } from '@angular/core';
+import { Router, CanActivateFn } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+
+// INTERVIEW TIP: "CanActivateFn is the modern functional guard.
+// inject() is used inside it to get service instances. This is
+// the new pattern since Angular 15 — no need for a class."
+export const authGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.isLoggedIn()) {
+    return true;
+  }
+
+  // Redirect to login if not authenticated
+  router.navigate(['/login']);
+  return false;
+};
+
+// Reverse guard — redirects logged-in users away from login page
+export const guestGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (!authService.isLoggedIn()) {
+    return true;
+  }
+
+  // Already logged in — redirect to dashboard
+  router.navigate(['/dashboard']);
+  return false;
+};

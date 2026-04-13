@@ -1,0 +1,151 @@
+// ============================================================
+// 📁 shared/models/models.ts — Frontend Data Models
+// ============================================================
+// INTERVIEW TIP: "We define interfaces on the frontend that
+// mirror the backend schemas. This gives us type safety when
+// working with API responses. If the API changes, TypeScript
+// will catch mismatches at compile time, not at runtime."
+// ============================================================
+
+// ── User ────────────────────────────────────────────────────
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'advocate';
+  phone?: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  data: {
+    user: User;
+    token: string;
+  };
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+  role?: string;
+}
+
+// ── Client ──────────────────────────────────────────────────
+export interface Client {
+  _id: string;
+  name: string;
+  email?: string;
+  phone: string;
+  alternatePhone?: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode?: string;
+  notes?: string;
+  cases?: Case[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── Case ────────────────────────────────────────────────────
+export type CaseStatus = 'active' | 'pending' | 'closed' | 'won' | 'lost' | 'settled';
+export type CaseType = 'civil' | 'criminal' | 'family' | 'property' | 'labour' | 'consumer' | 'tax' | 'corporate' | 'writ' | 'appeal' | 'other';
+export type Priority = 'low' | 'medium' | 'high' | 'urgent';
+
+export interface CaseNote {
+  _id?: string;
+  content: string;
+  date: string;
+}
+
+export interface Case {
+  _id: string;
+  caseNumber: string;
+  title: string;
+  description?: string;
+  client: Client | string;  // Can be populated or just an ID
+  caseType: CaseType;
+  court: string;
+  judge?: string;
+  opposingCounsel?: string;
+  opposingParty?: string;
+  status: CaseStatus;
+  priority: Priority;
+  filingDate?: string;
+  closingDate?: string;
+  notes: CaseNote[];
+  hearings?: Hearing[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── Hearing ─────────────────────────────────────────────────
+export type HearingStatus = 'scheduled' | 'completed' | 'adjourned' | 'cancelled';
+
+export interface Hearing {
+  _id: string;
+  case: Case | string;
+  date: string;
+  time?: string;
+  court: string;
+  courtRoom?: string;
+  purpose: string;
+  status: HearingStatus;
+  outcome?: string;
+  nextHearingDate?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── API Response Wrappers ───────────────────────────────────
+// INTERVIEW TIP: "Generic interfaces let us define a pattern
+// once and reuse it for any type. ApiResponse<Client> means
+// an API response where data contains a Client object."
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
+
+export interface PaginatedResponse<T> {
+  success: boolean;
+  data: {
+    [key: string]: T[];
+    // pagination will be accessed separately
+  } & {
+    pagination: Pagination;
+  };
+}
+
+export interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+// ── Dashboard ───────────────────────────────────────────────
+export interface DashboardStats {
+  overview: {
+    totalClients: number;
+    totalCases: number;
+    activeCases: number;
+    pendingCases: number;
+    closedCases: number;
+    upcomingHearingsCount: number;
+  };
+  casesByStatus: Record<string, number>;
+  casesByType: Record<string, number>;
+  upcomingHearings: Hearing[];
+  recentCases: Case[];
+}
